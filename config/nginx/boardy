@@ -1,5 +1,4 @@
 server {
-    listen 80;
     server_name nfrozensky.ai-info.ru;
 
     root /var/www/boardy;
@@ -8,9 +7,38 @@ server {
     access_log /var/log/nginx/boardy-access.log;
     error_log /var/log/nginx/boardy-error.log;
 
+    add_header Strict-Transport-Security "max-age=31536000" always;
+
     location / {
         try_files $uri $uri/ =404;
     }
 
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
+
+expires 7d;
+
+add_header Cache-Control "public, no-transform";
+
+}
+
     error_page 404 /404.html;
+
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/nfrozensky.ai-info.ru/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/nfrozensky.ai-info.ru/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+server {
+    if ($host = nfrozensky.ai-info.ru) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+    listen 80;
+    server_name nfrozensky.ai-info.ru;
+    return 404; # managed by Certbot
+
+
 }
