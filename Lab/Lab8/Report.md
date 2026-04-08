@@ -67,7 +67,4 @@
 - мы используем aiomysql, так как он асинхронный, что подходит под FastAPI. Если бы использовали не асинхронный, это бы заблокировало весь event loop на время выполнения запроса.
 
 
-01-mysql-status.png:
-![01-mysql-status.png](screenshots/01-mysql-status.png)
-
 
