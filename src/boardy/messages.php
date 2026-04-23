@@ -1,76 +1,52 @@
 <?php
-
 require_once 'db.php';
 
-
 $stmt = $pdo->query(
-
-'SELECT posts.body, users.name, posts.created_at
-
-FROM posts
-
-JOIN users ON posts.author_id = users.id
-
-ORDER BY posts.created_at DESC'
-
+    'SELECT posts.body, users.name, posts.created_at
+     FROM posts
+     JOIN users ON posts.author_id = users.id
+     ORDER BY posts.created_at DESC'
 );
-
 $messages = $stmt->fetchAll();
 
+include 'partials/head.php';
+include 'partials/nav.php';
 ?>
-
-<!DOCTYPE html>
-
-<html lang="ru">
-
-<head><meta charset="utf-8"><title>Boardy — Сообщения</title>
-
-<link rel="stylesheet" href="/css/style.css"></head>
-
-<body>
-
-<header><h1><a href="/">Boardy</a></h1></header>
-
-<main>
-
-<h2>Все сообщения</h2>
+<div class="container">
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Все сообщения</h2>
+    <?php if (isset($_SESSION['user_id'])): ?>
+        <a href="/submit.php" class="btn btn-primary">Написать пост</a>
+    <?php endif; ?>
+</div>
 
 <?php if (empty($messages)): ?>
-
-<p>Сообщений пока нет.</p>
-
+    <div class="alert alert-info">Сообщений пока нет. Будьте первым!</div>
 <?php else: ?>
-
-<table border="1" cellpadding="8"
-
-style="border-collapse:collapse;width:100%">
-
-<tr><th>Дата</th><th>Автор</th><th>Сообщение</th></tr>
-
-<?php foreach ($messages as $msg): ?>
-
-<tr>
-
-<td><?= htmlspecialchars($msg['created_at']) ?></td>
-
-<td><?= htmlspecialchars($msg['name']) ?></td>
-
-<td><?= htmlspecialchars($msg['body']) ?></td>
-
-</tr>
-
-<?php endforeach; ?>
-
-</table>
-
+    <div class="table-responsive">
+        <table class="table table-hover bg-white shadow-sm rounded">
+            <thead class="table-light">
+                <tr>
+                    <th style="width: 20%">Дата</th>
+                    <th style="width: 20%">Автор</th>
+                    <th>Сообщение</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($messages as $msg): ?>
+                <tr>
+                    <td class="text-muted small">
+                        <?= htmlspecialchars($msg['created_at']) ?>
+                    </td>
+                    <td>
+                        <span class="badge bg-secondary"><?= htmlspecialchars($msg['name']) ?></span>
+                    </td>
+                    <td><?= htmlspecialchars($msg['body']) ?></td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 <?php endif; ?>
-
-<p style="margin-top:20px">
-
-<a href="/feedback.html">Написать</a> |
-
-<a href="/">На главную</a></p>
-
-</main>
-
-</body></html>
+</div>
+<?php include 'partials/foot.php'; ?>

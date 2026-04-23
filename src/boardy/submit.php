@@ -1,77 +1,43 @@
 <?php
-
 require_once 'db.php';
 
-
-$name = $_POST['name'] ?? '';
-
-$message = $_POST['message'] ?? '';
-
-
-if ($name && $message) {
-
-// Ищем или создаём пользователя
-
-$stmt = $pdo->prepare('SELECT id FROM users WHERE name = ?');
-
-$stmt->execute([$name]);
-
-$user = $stmt->fetch();
-
-
-if (!$user) {
-
-$stmt = $pdo->prepare(
-
-'INSERT INTO users (name, email, password) VALUES (?, ?, ?)'
-
-);
-
-$stmt->execute([$name, $name.'@boardy.local', 'temp']);
-
-$user_id = $pdo->lastInsertId();
-
-} else {
-
-$user_id = $user['id'];
-
+if (!isset($_SESSION['user_id'])) {
+    header('Location: login.php');
+    exit;
 }
 
-
-// Создаём пост (prepared statement!)
-
-$stmt = $pdo->prepare(
-
-'INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)'
-
-);
-
-$stmt->execute(['Сообщение', $message, $user_id]);
-
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $message = trim($_POST['message'] ?? '');
+    
+    if ($message) {
+        $stmt = $pdo->prepare('INSERT INTO posts (title, body, author_id) VALUES (?, ?, ?)');
+        $stmt->execute(['Сообщение', $message, $_SESSION['user_id']]);
+        
+        header('Location: messages.php');
+        exit;
+    }
 }
 
+include 'partials/head.php';
+include 'partials/nav.php';
 ?>
-
-<!DOCTYPE html>
-
-<html lang="ru">
-
-<head><meta charset="utf-8"><title>Boardy</title>
-
-<link rel="stylesheet" href="/css/style.css"></head>
-
-<body>
-
-<header><h1><a href="/">Boardy</a></h1></header>
-
-<main>
-
-<h2>Спасибо, <?= htmlspecialchars($name) ?>!</h2>
-
-<p><a href="/">На главную</a> |
-
-<a href="/messages.php">Все сообщения</a></p>
-
-</main>
-
-</body></html>
+<div class="container">
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h2 class="mb-4">Новый пост</h2>
+                <form action="submit.php" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Что у вас нового?</label>
+                        <textarea name="message" class="form-control" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Опубликовать</button>
+                    <a href="messages.php" class="btn btn-link">Отмена</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+<?php include 'partials/foot.php'; ?>
