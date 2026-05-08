@@ -12,8 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $hash = password_hash($password, PASSWORD_BCRYPT);
 
         try {
-            $stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash, password) VALUES (?, ?, ?, ?)');
-            $stmt->execute([$name, $email, $hash, 'active']);
+            $stmt = $pdo->prepare('INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)');                  
+	    $stmt->execute([$name, $email, $hash]);  
             
             $userId = $pdo->lastInsertId();
 
