@@ -1,8 +1,8 @@
 server {
     server_name nfrozensky.ai-info.ru;
 
-    root /var/www/boardy;
-    index index.html;
+    root /var/www/boardy/public;
+    index index.php;
 
     access_log /var/log/nginx/boardy-access.log;
     error_log /var/log/nginx/boardy-error.log;
@@ -10,8 +10,8 @@ server {
     add_header Strict-Transport-Security "max-age=31536000" always;
 
     location / {
-        try_files $uri $uri/ =404;
-    }
+	try_files $uri $uri/ /index.php?$query_string;
+	}
 
     location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg)$ {
 
@@ -56,18 +56,28 @@ server {
 #}
 location ~ \.php$ {
     fastcgi_pass unix:/var/run/php/php-fpm.sock;
+    fastcgi_index index.php;
     include fastcgi_params;
-    fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+    fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+    fastcgi_param DOCUMENT_ROOT $realpath_root;
 }
+
+location ~ /\. { deny all; }
 
 location /phpmyadmin {
     alias /usr/share/phpmyadmin;
     index index.php;
- 
-    location ~ \.php$ {
+
+    location ~ ^/phpmyadmin/(.+\.php)$ {
+        alias /usr/share/phpmyadmin/$1;
         fastcgi_pass unix:/var/run/php/php-fpm.sock;
         include fastcgi_params;
-        fastcgi_param SCRIPT_FILENAME $request_filename;
+        fastcgi_param SCRIPT_FILENAME /usr/share/phpmyadmin/$1;
+    }
+
+    location ~* ^/phpmyadmin/(.+\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf))$ {
+        alias /usr/share/phpmyadmin/$1;
+        expires 7d;
     }
 }
 
