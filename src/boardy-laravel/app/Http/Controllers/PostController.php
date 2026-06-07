@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Post;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Redis;
 
 class PostController extends Controller
 {
@@ -29,17 +29,14 @@ class PostController extends Controller
 
         $post = $request->user()->posts()->create($data);
 
-        try {
-            Http::timeout(2)->post('http://localhost:8000/internal/broadcast', [
-                'id'         => $post->id,
-                'title'      => $post->title,
-                'body'       => $post->body,
-                'author'     => $request->user()->name,
-                'created_at' => $post->created_at->toISOString(),
-            ]);
-        } catch (\Exception $e) {
-            \Log::warning('WS broadcast failed: ' . $e->getMessage());
-        }
+        // Никаких HTTP-вызовов к FastAPI — публикуем событие в Redis (асинхронная шина)
+        Redis::publish('new_post', json_encode([
+            'id'         => $post->id,
+            'title'      => $post->title,
+            'body'       => $post->body,
+            'author'     => $request->user()->name,
+            'created_at' => $post->created_at->toISOString(),
+        ]));
 
         return redirect()->route('posts.show', $post)
             ->with('success', 'Пост добавлен');
@@ -47,7 +44,7 @@ class PostController extends Controller
 
     public function show(Post $post)
     {
-        $post->load('author', 'comments.author');
+        $post->load('author');
         return view('posts.show', compact('post'));
     }
 

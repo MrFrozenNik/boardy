@@ -2,7 +2,6 @@
 
 namespace Database\Seeders;
 
-use App\Models\Comment;
 use App\Models\Post;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -26,11 +25,6 @@ class DatabaseSeeder extends Seeder
         ]);
         $users = User::factory()->count(4)->create();
         $posts = Post::factory()->count(10)->create([
-            'user_id' => fn() => $users->random()->id,
-        ]);
-
-        Comment::factory()->count(25)->create([
-            'post_id' => fn() => $posts->random()->id,
             'user_id' => fn() => $users->random()->id,
         ]);
 

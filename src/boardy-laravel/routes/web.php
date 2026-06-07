@@ -5,7 +5,7 @@ use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
-
+Route::view('/oauth/callback', 'oauth.callback');
 Route::get('/', function () {
     return view('welcome');
 });
