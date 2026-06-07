@@ -38,40 +38,10 @@
             </div>
         </article>
 
-        <h3 class="text-lg font-semibold mb-3">
-            Комментарии ({{ $post->comments->count() }})
-        </h3>
+        <h3 class="text-lg font-semibold mb-3">Комментарии</h3>
 
-        @forelse ($post->comments as $comment)
-            <div class="bg-white shadow rounded-lg p-4 mb-2">
-                <p class="text-gray-800 mb-1">{{ $comment->body }}</p>
-                <small class="text-gray-500">
-                    {{ $comment->author->name }} · {{ $comment->created_at->diffForHumans() }}
-                </small>
-            </div>
-        @empty
-            <p class="text-gray-500">Комментариев пока нет.</p>
-        @endforelse
-
-        @auth
-            <form action="{{ route('comments.store') }}" method="POST" class="mt-4">
-                @csrf
-                <input type="hidden" name="post_id" value="{{ $post->id }}">
-                <textarea name="body" rows="3" required
-                          class="w-full border-gray-300 rounded-md shadow-sm"
-                          placeholder="Ваш комментарий">{{ old('body') }}</textarea>
-                @error('body')
-                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
-                @enderror
-                <button class="mt-2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">
-                    Отправить
-                </button>
-            </form>
-        @else
-            <p class="text-gray-500 mt-4">
-                <a href="{{ route('login') }}" class="text-indigo-600 hover:underline">Войдите</a>,
-                чтобы оставить комментарий.
-            </p>
-        @endauth
+        <div id="comments-app"
+             data-post-id="{{ $post->id }}"
+             data-user-name="{{ auth()->user()?->name }}"></div>
     </div>
 </x-app-layout>

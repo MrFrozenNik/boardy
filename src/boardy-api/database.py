@@ -5,7 +5,7 @@ DB_CONFIG = {
     'port': 3306,
     'user': 'boardy',
     'password': 'boardy',
-    'db': 'boardy',
+    'db': 'boardy_api',
     'charset': 'utf8mb4',
 }
 
