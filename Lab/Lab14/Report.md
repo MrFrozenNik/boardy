@@ -124,3 +124,51 @@ HttpOnly-кука JS недоступна — даже при XSS скрипт �
 20-laravel-publish.png:
 ![02-spa-client.png](screenshots/02-spa-client.png)
 
+#### чем Redis::publish архитектурно лучше Http::post() к FastAPI?
+- HTTP-callback - синхронная жёсткая связь: Laravel ждёт ответ FastAPI, и если тот лежит - пост либо не создастся, либо повиснет таймаут. Redis publish - асинхронная шина: Laravel «выстрелил и забыл», ему всё равно, запущен ли подписчик. Сервисы развязаны (loose coupling), падение FastAPI не ломает создание постов, и подписчиков можно добавлять сколько угодно без правок в Laravel.
+
+21-subscriber-running.png:
+![21-subscriber-running.png](screenshots/21-subscriber-running.png)
+
+22-broadcast-flow.png:
+![22-broadcast-flow.png](screenshots/22-broadcast-flow.png)
+
+23-user-renamed.png:
+![23-user-renamed.png](screenshots/23-user-renamed.png)
+
+#### почему UserObserver вызывается автоматически?
+- Когда я меняю имя
+  пользователя и вызываю `$user->save()`, Eloquent после записи в БД диспатчит
+  событие updated. Строка User::observe(UserObserver::class) в AppServiceProvider::boot()
+  подписывает наблюдателя на эти события: метод updated(User `$user`) в обсервере
+  становится слушателем события updated модели User. Поэтому мне не нужно нигде
+  вручную звать Redis - достаточно, что имя сохранилось через Eloquent, и обсервер
+  сработает сам.
+
+#### Где это магия Laravel?
+
+- Магия - в трейте `Illuminate\Database\Eloquent\Concerns\HasEvents`, который
+  подключён к базовому классу `Model`. Именно он при операциях с моделью вызывает `fireModelEvent('updated')`, `fireModelEvent` отправляет событие через диспетчер событий
+  (`Illuminate\Contracts\Events\Dispatcher`, доступный как фасад `Event`); `observe()` под капотом просто регистрирует методы обсервера как слушателей
+  соответствующих событий в этом диспетчере.
+
+
+24-denorm-before.png:
+![24-denorm-before.png](screenshots/24-denorm-before.png)
+
+25-denorm-after.png:
+![25-denorm-after.png](screenshots/25-denorm-after.png)
+
+#### что такое eventual consistency? 
+- при смене имени Laravel сначала пишет в свою БД, публикует событие user.renamed в Redis, и только потом - асинхронно - FastAPI-подписчик делает UPDATE comments. В промежутке копии временно расходятся, но «в конце концов» (eventual) приходят к согласию. Это и есть eventual consistency
+
+
+#### Когда между сменой имени и обновлением comments может быть задержка?
+- Лаг доставки в Redis, FastAPI-подписчик был недоступен, очередь событий: если разом меняется много данных, UPDATE'ы обрабатываются последовательно, сетевые задержки между сервисами, медленный UPDATE при большом числе комментариев автора / блокировки в БД
+
+26-two-browsers-post.png:
+![26-two-browsers-post.png](screenshots/26-two-browsers-post.png)
+
+
+27-two-browsers-comment.png:
+![27-two-browsers-comment.png](screenshots/27-two-browsers-comment.png)
