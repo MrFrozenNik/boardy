@@ -44,12 +44,7 @@
     <script>
         console.log('Скрипт успешно загружен на страницу!');
 
-        @if(app()->environment('production'))
-        const wsUrl = 'wss://api.{{ config("app.fastapi_domain") }}/ws'
-        @else
-        const wsUrl = 'ws://localhost:8001/ws'
-        @endif
-
+	const wsUrl = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'
         console.log('Попытка подключиться к:', wsUrl);
 
         function connect() {

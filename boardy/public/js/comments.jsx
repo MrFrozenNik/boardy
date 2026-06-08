@@ -1,8 +1,7 @@
 import { startLogin, refreshToken } from '/js/auth.js'
 
-const API = 'https://api.nfrozensky.ai-info.ru'
-const WS_URL = API.replace(/^http/, 'ws') + '/ws'
-
+const API = ''
+const WS_URL = (location.protocol === 'https:' ? 'wss://' : 'ws://') + location.host + '/ws'
 
 function decodeSub(token) {
     try {

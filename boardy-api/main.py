@@ -9,7 +9,7 @@ from database import get_db
 from routers import comments
 from routers import ws
 from fastapi.middleware.cors import CORSMiddleware
-
+import os
 import logging
 logger = logging.getLogger('uvicorn.error')
 
@@ -68,6 +68,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         'http://localhost',
+	'http://150.241.70.235',
         'https://nfrozensky.ai-info.ru',
     ],
     allow_credentials=True,

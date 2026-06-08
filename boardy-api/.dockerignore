@@ -1,8 +1,6 @@
 venv
-.venv
 __pycache__
 *.pyc
 .env
 .git
-*.key
 oauth-public.key
