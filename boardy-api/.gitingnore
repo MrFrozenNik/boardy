@@ -1,0 +1,36 @@
+# Байткод и кэш Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Виртуальное окружение
+venv/
+.venv/
+env/
+ENV/
+
+# Секреты и окружение
+.env
+*.env
+
+# OAuth-ключи (копируются из Passport per-deploy, в репозитории не нужны)
+*.key
+oauth-public.key
+oauth-private.key
+
+# Логи
+*.log
+
+# Кэши инструментов
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Редакторы / ОС
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
