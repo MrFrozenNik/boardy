@@ -1,2 +1,3 @@
 # webEngineeringCourse
-A repository for "Web engineering" course in UrFU
+
+my repository for the "web engineering" course
